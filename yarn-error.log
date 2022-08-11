@@ -1,0 +1,54 @@
+Arguments: 
+  /Users/miooo/.nvm/versions/node/v16.15.0/bin/node /Users/miooo/.nvm/versions/node/v16.15.0/bin/yarn add fluent-ffmpeg ffmpeg-static ffprobe-static
+
+PATH: 
+  /Users/miooo/opt/anaconda3/bin:/Users/miooo/opt/anaconda3/condabin:/Users/miooo/.nvm/versions/node/v16.15.0/bin:/usr/local/sbin:/usr/local/opt/llvm/bin:/usr/local/opt/mongodb-community@4.2/bin:/usr/local/opt/mongodb-community@4.2/bin:/usr/local/opt/mongodb-community@4.2/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/TeX/texbin:/usr/local/go/bin:/Library/Apple/usr/bin:/Users/miooo/Library/Android/sdk/platform-tools:/Users/{yourusername}/Library/Android/sdk/tools:/Users/{yourusername}/Library/Android/sdk/platform-tools:/usr/local/sbin:/usr/local/opt/llvm/bin:/usr/local/opt/mongodb-community@4.2/bin:/Users/miooo/development/flutter/bin:/Users/miooo/Library/Android/sdk/emulator:/Users/miooo/Library/Android/sdk/tools:/Users/miooo/Library/Android/sdk/tools/bin:/Users/miooo/Library/Android/sdk/platform-tools
+
+Yarn version: 
+  1.22.18
+
+Node version: 
+  16.15.0
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: EINVAL: invalid argument, unlink '/Users/miooo/Miooo/对轨/silence_remove/electron-quick-start/node_modules/got/node_modules/get-stream'
+
+npm manifest: 
+  {
+    "name": "electron-quick-start",
+    "version": "1.0.0",
+    "description": "A minimal Electron application",
+    "main": "main.js",
+    "scripts": {
+      "start": "electron ."
+    },
+    "repository": "https://github.com/electron/electron-quick-start",
+    "keywords": [
+      "Electron",
+      "quick",
+      "start",
+      "tutorial",
+      "demo"
+    ],
+    "author": "GitHub",
+    "license": "CC0-1.0",
+    "devDependencies": {
+      "electron": "^20.0.1"
+    },
+    "build": {
+      "asarUnpack":[
+        "node_modules/ffmpeg-static/bin/${os}/${arch}/ffmpeg",
+        "node_modules/ffmpeg-static/index.js",
+        "node_modules/ffmpeg-static/package.json"
+      ]
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

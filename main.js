@@ -1,6 +1,7 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow} = require('electron')
 const path = require('path')
+const ffmpeg = require('@ffmpeg-installer/ffmpeg')
 
 function createWindow () {
   // Create the browser window.
@@ -8,8 +9,11 @@ function createWindow () {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true
+    },    
   })
 
   // and load the index.html of the app.
@@ -29,6 +33,7 @@ app.whenReady().then(() => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    console.log(ffmpeg.path, ffmpeg.version);
   })
 })
 
