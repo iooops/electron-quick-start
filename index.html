@@ -5,6 +5,7 @@
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"> -->
     <link href="./styles.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <title>Hello World!</title>
   </head>
   <body>
@@ -13,12 +14,25 @@
     Chromium <span id="chrome-version"></span>,
     and Electron <span id="electron-version"></span>. -->
     <div id="app">
-      {{message}}
+      <button @click="loadFolder">加载文件夹</button>
+      <button @click="save">覆盖保存</button>
+      <button @click="saveAs">另存</button>
+      <button @click="clearAll">清空所有</button>
+      <button @click="loadFolder">参数设置</button>
+      <button @click="processNow">开始处理</button>
+      <div id="audioFiles">
+        <div v-for="f in audioFileList">
+          <div class="name">{{f.fileName}}</div>
+          <div :id="f.containerId"></div>
+        </div>
+      </div>
     </div>
 
     <!-- You can also require other files to run in this process -->
-    <script src="./vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <script src="./app.js"></script>
     <script src="./renderer.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
   </body>
 </html>

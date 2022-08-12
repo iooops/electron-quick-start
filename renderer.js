@@ -9,19 +9,23 @@
 // console.log(ffmpeg.path, ffmpeg.version);
 
 function runCommand(cmd, args, onData, onFinish) {
-    var proc = spawn(cmd, args.split(' '), { shell: true });
-    proc.stdout.on('data', onData);
-    proc.stderr.setEncoding("utf8")
-    proc.stderr.on('data', err => console.log(err) );
-    proc.on('close', onFinish);
+  var proc = spawn(cmd, args.split(" "), { shell: true });
+  proc.stdout.on("data", onData);
+  proc.stderr.setEncoding("utf8");
+  proc.stderr.on("data", (err) => console.log(err));
+  proc.on("close", onFinish);
 }
 
-module.exports = { runCommand }
+const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+const spawn = require("child_process").spawn;
 
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-const spawn = require('child_process').spawn;
-
-async function helloworld() {
-    await new Promise(r => runCommand(ffmpegPath, '-i /Users/miooo/Downloads/nongjia279mp3_1659620142298.mp3', data => console.log(data), () => r()))
+async function removeSilence(inputPath, outputPath) {
+  await new Promise((r) =>
+    runCommand(
+      ffmpegPath,
+      '-i ' + inputPath + ' -af "silenceremove=start_periods=1:stop_periods=-1:start_threshold=-30dB:stop_threshold=-30dB:start_silence=2:stop_silence=2" ' + outputPath,
+      (data) => console.log(data),
+      () => r()
+    )
+  );
 }
-helloworld()

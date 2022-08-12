@@ -1,19 +1,41 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron')
+const {app, BrowserWindow, ipcMain, dialog} = require('electron')
 const path = require('path')
-const ffmpeg = require('@ffmpeg-installer/ffmpeg')
+
+async function handleFolderOpen() {
+  const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] })
+  if (canceled) {
+    return
+  } else {
+    return filePaths[0]
+  }
+}
+
+async function handleSave() {
+  const { canceled, filePath } = await dialog.showSaveDialog()
+  if (canceled) {
+    return
+  } else {
+    return filePath
+  }
+}
+
+async function getTempPath() {
+  const tempPath = await app.getPath('temp')
+  return tempPath
+}
 
 function createWindow () {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 900,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false,
       enableRemoteModule: true
-    },    
+    },
   })
 
   // and load the index.html of the app.
@@ -27,13 +49,15 @@ function createWindow () {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  ipcMain.handle('dialog:openFolder', handleFolderOpen)
+  ipcMain.handle('app:getTempPath', getTempPath)
+  ipcMain.handle('dialog:save', handleSave)
   createWindow()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
-    console.log(ffmpeg.path, ffmpeg.version);
   })
 })
 
