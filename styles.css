@@ -2,3 +2,58 @@
 
 /* Add styles here to customize the appearance of your app */
 
+#app {
+    background-color: #eee;
+    font-size: 12px;
+}
+
+.menu {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: white;
+}
+
+.btn {
+    padding: 5px 12px;
+    border-radius: 5px;
+    color: #555;
+    background-color: #eee;
+    cursor: pointer;
+}
+
+.btn:not(:last-child) {
+    margin-right: 10px;
+}
+
+.btn.highlight {
+    color: rgb(255, 68, 0);
+    background-color: rgb(255, 68, 0, .1);
+}
+
+.stats {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+}
+
+.links {
+    font-size: 11px;
+    display: flex;
+    color: rgb(255, 68, 0);
+    background-color: rgb(255, 68, 0, .1);
+    flex-direction: row;
+    padding: 5px 15px;
+    border-radius: 20px;
+    margin: 0 10px;
+}
+
+.links > div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 15px;
+    cursor: pointer
+}
+
+

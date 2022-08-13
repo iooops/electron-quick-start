@@ -4,13 +4,14 @@ const fs = require('fs')
 
 const app = new Vue({
   el: '#app',
-  data() {
-    return {
-      tempPath: null,
-      audioFileList: [],
-      processing: false,
-      processDone: false
-    };
+  data: {
+    tempPath: null,
+    audioFileList: [],
+    processing: false,
+    processDone: false,
+    volume: -30,
+    dur: 5000,
+    pdur: 2000
   },
   async mounted() {
     const tempPath = await window.electronAPI.getTempPath()

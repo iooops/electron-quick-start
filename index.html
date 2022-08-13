@@ -14,15 +14,35 @@
     Chromium <span id="chrome-version"></span>,
     and Electron <span id="electron-version"></span>. -->
     <div id="app">
-      <button @click="loadFolder">加载文件夹</button>
-      <button @click="save">覆盖保存</button>
-      <button @click="saveAs">另存</button>
-      <button @click="clearAll">清空所有</button>
-      <button @click="loadFolder">参数设置</button>
-      <button @click="processNow">开始处理</button>
+      <div class="menu">
+        <div class="btn highlight" @click="loadFolder">加载文件夹</div>
+        <div class="btn" @click="save">覆盖保存</div>
+        <div class="btn" @click="saveAs">另存</div>
+        <div class="btn" @click="clearAll">清空已有</div>
+        <div class="stats">
+          <div>总音频数：<span class="af_count">{{audioFileList.length}}</span></div>
+          <div v-if="processDone">处理前 处理后 相差 处理数 </div>
+        </div>
+        <div class="links">
+          <div class="link1">画本神器戳我</div>
+          <div class="link2">对轨神器戳我</div>
+        </div>
+        <div class="btn" @click="loadFolder">参数设置</div>
+        <div class="box">
+          <div class="box_header">定义静音为</div>
+          <div>音量低于：<el-input-number v-model="volume" controls-position="right" :step="0.1" :min="-90" :max="-20"></el-input-number>dB</div>
+          <div>持续大于：<el-input-number v-model="dur" controls-position="right" :step="1" :min="500" :max="10000"></el-input-number>ms</div>
+          <div>处理后静音最长为：<el-input-number v-model="pdur" controls-position="right" :step="1" :min="500" :max="10000"></el-input-number>ms</div>
+        </div>
+        <div class="btn highlight" @click="processNow">开始处理</div>  
+      </div>
       <div id="audioFiles">
-        <div v-for="f in audioFileList">
-          <div class="name">{{f.fileName}}</div>
+        <div class="af" v-for="f in audioFileList">
+          <div>
+            <div class="name">{{f.fileName}}</div>
+            <div v-if="processDone">处理前 处理后 相差 处理数 </div>
+            <div class="close">X</div>
+          </div>
           <div :id="f.containerId"></div>
         </div>
       </div>
@@ -30,9 +50,9 @@
 
     <!-- You can also require other files to run in this process -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js"></script>
     <script src="./app.js"></script>
     <script src="./renderer.js"></script>
-    <script src="https://unpkg.com/wavesurfer.js"></script>
-    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
   </body>
 </html>
