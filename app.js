@@ -78,7 +78,7 @@ const app = new Vue({
         await Promise.all(this.audioFileList.map(async f => {
           await removeSilence(f.filePath, f.outputPath)
           f.wavesurfer.load(f.outputPath)
-        }))  
+        }))
       } catch(err) {
         console.err(err)
       }
