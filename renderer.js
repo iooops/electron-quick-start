@@ -19,13 +19,35 @@ function runCommand(cmd, args, onData, onFinish) {
 const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
 const spawn = require("child_process").spawn;
 
-async function removeSilence(inputPath, outputPath) {
+async function removeSilence(inputPath, outputPath, volume, dur, pdur) {
   await new Promise((r) =>
     runCommand(
       ffmpegPath,
-      '-i ' + inputPath + ' -af "silenceremove=start_periods=1:stop_periods=-1:start_threshold=-30dB:stop_threshold=-30dB:start_silence=2:stop_silence=2" ' + outputPath,
+      '-i ' + inputPath + ' -af "silenceremove=start_periods=1:stop_periods=-1:stop_duration=' + dur + ':start_threshold=' + volume + 'dB:stop_threshold=' + volume + 'dB:start_silence=' + (pdur/1000) + ':stop_silence=' + (pdur/1000) + '" ' + outputPath,
       (data) => console.log(data),
       () => r()
     )
   );
+}
+
+async function getAudioDuration(file, isUrl = false) {
+  const dur = await new Promise((resolve, reject) => {
+    let url
+    if (!isUrl) {
+      url = URL.createObjectURL(file)
+    } else {
+      url = file
+    }
+		const mySound = new Audio(url)
+		let done = false
+		mySound.addEventListener('loadedmetadata', () => {
+			URL.revokeObjectURL(url)
+			done = true
+			resolve(mySound.duration)
+		}, false)
+		setTimeout(() => {
+			if (!done)	reject()
+		}, 2000)
+	})
+  return dur
 }

@@ -13,37 +13,54 @@
     We are using Node.js <span id="node-version"></span>,
     Chromium <span id="chrome-version"></span>,
     and Electron <span id="electron-version"></span>. -->
-    <div id="app">
+    <div id="app" v-cloak>
       <div class="menu">
         <div class="btn highlight" @click="loadFolder">加载文件夹</div>
         <div class="btn" @click="save">覆盖保存</div>
         <div class="btn" @click="saveAs">另存</div>
         <div class="btn" @click="clearAll">清空已有</div>
         <div class="stats">
-          <div>总音频数：<span class="af_count">{{audioFileList.length}}</span></div>
-          <div v-if="processDone">处理前 处理后 相差 处理数 </div>
+          <div>总音频数：<span class="stats_highlight">{{audioFileList.length}}</span>  <span>处理前： <span class="stats_highlight">{{totalDur.toFixed(2)}}s</span></span><span v-if="processDone">处理后： 相差： 处理数： </span></div>
         </div>
         <div class="links">
           <div class="link1">画本神器戳我</div>
           <div class="link2">对轨神器戳我</div>
         </div>
-        <div class="btn" @click="loadFolder">参数设置</div>
-        <div class="box">
-          <div class="box_header">定义静音为</div>
-          <div>音量低于：<el-input-number v-model="volume" controls-position="right" :step="0.1" :min="-90" :max="-20"></el-input-number>dB</div>
-          <div>持续大于：<el-input-number v-model="dur" controls-position="right" :step="1" :min="500" :max="10000"></el-input-number>ms</div>
-          <div>处理后静音最长为：<el-input-number v-model="pdur" controls-position="right" :step="1" :min="500" :max="10000"></el-input-number>ms</div>
+        <div class="btn">
+          <div  @click="openParamsBox">参数设置</div>
+          <div class="box" v-if="showParamsBox">
+            <div class="close" @click="hideParamsBox">
+              <i class="el-icon-error"></i>
+            </div>
+            <div class="box_header">定义静音为</div>
+            <div class="box_line">音量低于：<el-input-number v-model="volume" size="small" controls-position="right" :step="0.1" :min="-90" :max="-20"></el-input-number><span class="amount">dB</span></div>
+            <div class="box_line">持续大于：<el-input-number v-model="dur" size="small" controls-position="right" :step="1" :min="500" :max="10000"></el-input-number><span class="amount">ms</span></div>
+            <div class="box_line">处理后静音最长为：<el-input-number v-model="pdur" size="small" controls-position="right" :step="1" :min="500" :max="10000"></el-input-number><span class="amount">ms</span></div>
+            <div class="confirm_btn" @click="confirmParams">确定</div>
+          </div>
         </div>
         <div class="btn highlight" @click="processNow">开始处理</div>  
       </div>
-      <div id="audioFiles">
+      <div id="audioFiles" v-loading="processing">
         <div class="af" v-for="f in audioFileList">
-          <div>
-            <div class="name">{{f.fileName}}</div>
-            <div v-if="processDone">处理前 处理后 相差 处理数 </div>
-            <div class="close">X</div>
+          <div class="af_header">
+            <div class="af_name">{{f.fileName}}</div>
+            <div class="af_stats">
+              <span>处理前： <span class="stats_highlight">{{f.duration}}s</span>  </span><span v-if="processDone">处理后：<span class="stats_highlight">{{f.pDuration}}</span> 相差：{{f.duration - f.pDuration}} 处理数： </span></div>
+            <el-popconfirm
+              confirm-button-text='确定'
+              cancel-button-text='取消'
+              icon="el-icon-info"
+              icon-color="red"
+              title="确定删除这条音频吗？"
+              @confirm="removeAudio(f)"
+            >
+              <div slot="reference" class="af_close">
+                <i class="el-icon-error"></i>
+              </div>
+            </el-popconfirm>
           </div>
-          <div :id="f.containerId"></div>
+          <div class="af_wave" :id="f.containerId"></div>
         </div>
       </div>
     </div>
