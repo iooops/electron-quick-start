@@ -8,44 +8,54 @@ const app = new Vue({
     tempPath: null,
     audioFileList: [],
     processing: false,
-    processDone: false,
     volume: -30,
     dur: 5000,
     pdur: 2000,
     old_volume: -30,
     old_dur: 5000,
     old_pdur: 2000,
-    showParamsBox: false
+    showParamsBox: false,
+    showCancelBtn: false
   },
   computed: {
     totalDur() {
       return this.audioFileList.map(af => af.duration).reduce((a, b) => a + b, 0)
+    },
+    totalPDur() {
+      return this.audioFileList.map(af => af.pDuration).reduce((a, b) => a + b, 0)
+    },
+    progressHint() {
+      const processed = this.audioFileList.filter(af => af.done)
+      return processed.length + '/' + this.audioFileList.length
+    },
+    processDone() {
+      return this.audioFileList.length && this.audioFileList.length === this.audioFileList.filter(af => af.done).length
     }
   },
   async mounted() {
-    const tempPath = await window.electronAPI.getTempPath()
-    console.log(tempPath)
-    this.tempPath = tempPath
-    const dir = this.tempPath + 'sil_r/'
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+    await this.initTempDir()
+    this.initParams()
     document.addEventListener('drop', async (event) => {
       event.preventDefault();
       event.stopPropagation();
-      for (let i = 0; i < event.dataTransfer.files.length; i++) {
-        const f = event.dataTransfer.files[i]
-        // console.log(f)
+      const newList = []
+      let i = 0
+      for (const f of event.dataTransfer.files) {
+        console.log(f)
         console.log('File Path of dragged files: ', f.path)
-        const containerId = 'f' + Date.now() + '_' + i
-        const duration = await getAudioDuration(f)
-        console.log(duration)
-        this.audioFileList.push({
-          containerId, filePath: f.path, fileName: f.name, outputPath: this.tempPath + 'sil_r/' + containerId + '_' + f.name, duration
-        })
+        if (f.type.startsWith('audio/')) {
+          const containerId = 'f' + Date.now() + '_' + (i++)
+          const duration = await getAudioDuration(f)
+          console.log(duration)
+          newList.push({
+            containerId, filePath: f.path, fileName: f.name, outputPath: this.tempPath + containerId + '_' + f.name, duration
+          })
+        }
       }
+      this.audioFileList = [...this.audioFileList, ...newList]
+      console.log(this.audioFileList)
       setTimeout(() => {
-        for (const f of this.audioFileList) {
+        for (const f of newList) {
           this.drawBuffer(f.containerId, f.filePath)
         }
       }, 100)
@@ -56,10 +66,25 @@ const app = new Vue({
     });
   },
 	methods: {
+    showCancel() {
+      this.showCancelBtn = true
+    },
+    hideCancel() {
+      this.showCancelBtn = false
+    },
+    async initTempDir() {
+      const tempPath = await window.electronAPI.getTempPath()
+      this.tempPath = tempPath + 'sil_r/'
+      if (!fs.existsSync(this.tempPath)) {
+        fs.mkdirSync(this.tempPath, { recursive: true });
+      }
+    },
     removeAudio(f) {
+      if (this.processing)  return
       this.audioFileList = this.audioFileList.filter(af => af.containerId !== f.containerId)
     },
     openParamsBox() {
+      if (this.processing)  return
       this.showParamsBox = true
       this.old_volume = this.volume
       this.old_dur = this.dur
@@ -72,58 +97,131 @@ const app = new Vue({
       this.pdur = this.old_pdur
     },
     confirmParams() {
+      if (this.processing)  return
+      localStorage.setItem('params', JSON.stringify({
+        volume: this.volume,
+        dur: this.dur,
+        pdur: this.pdur
+      }))
       this.showParamsBox = false
+    },
+    initParams() {
+      const p = localStorage.getItem('params')
+      if (p) {
+        const params = JSON.parse(p)
+        this.volume = params.volume
+        this.dur = params.dur
+        this.pdur = params.pdur
+      }
     },
     drawBuffer(containerId, filePath) {
       const wavesurfer = WaveSurfer.create({
         container: '#'+containerId,
         waveColor: 'rgb(255, 68, 0)',
-        cursorWidth: 0,
-        interact: false
+        progressColor: 'rgb(250, 149, 112)',
+        cursorColor: 'rgb(255, 68, 0)'
+        // cursorWidth: 0,
+        // interact: false
       });
       wavesurfer.load(filePath);
       this.audioFileList = this.audioFileList.map(f => f.containerId === containerId? ({ ...f, wavesurfer }): f)
+      wavesurfer.on('ready', () => {
+        this.audioFileList = this.audioFileList.map(f => f.containerId === containerId? ({ ...f, wavesurfer, readyPlay: true, playing: false }): f)
+      })
+    },
+    playAudio(f) {
+      for (const afl of this.audioFileList) {
+        this.pauseAudio(afl)
+      }
+      f.wavesurfer.play()
+      this.audioFileList = this.audioFileList.map(af => af.containerId === f.containerId? ({ ...af, playing: true }): af)
+    },
+    pauseAudio(f) {
+      f.wavesurfer.pause()
+      this.audioFileList = this.audioFileList.map(af => af.containerId === f.containerId? ({ ...af, playing: false }): af)
     },
     clearAll() {
-      if (this.processing)  return
+      if (this.processing || !this.audioFileList.length)  return this.$message.warning('请先加载音频文件')
       this.audioFileList = []
-      this.processDone = false
+      fs.rmdirSync(this.tempPath, { recursive: true })
+      this.initTempDir()
+      this.$message.success('已清空')
     },
     save() {
-      if (!this.processDone)  return
-      for (const f of this.audioFileList) {
-        fs.renameSync(f.outputPath, f.filePath)
-      }
+      if (!this.processDone) return this.$message.warning('请先加载音频后处理')
+      this.$confirm('此操作将永久覆盖原有文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        for (const f of this.audioFileList) {
+          fs.copyFileSync(f.outputPath, f.filePath)
+        }
+        this.$message.success('操作成功')
+      }).catch(() => {
+        //
+      });
     },
     async saveAs() {
-      if (!this.processDone)  return
+      if (!this.processDone)  return this.$message.warning('请先处理音频后操作')
       const filePath = await window.electronAPI.openFolder()
       console.log(filePath)
       for (const f of this.audioFileList) {
-        fs.rename(f.outputPath, filePath + '/【已脱水】' + f.fileName)
+        fs.copyFileSync(f.outputPath, filePath + '/【已脱水】' + f.fileName)
       }
+      this.$message.success('操作成功')
     },
     async processNow() {
+      if (this.processing || this.processDone)  return
+      if (!this.audioFileList.length) {
+        return this.$message.warning('请先加载音频文件后操作')
+      }
       if (this.showParamsBox) this.hideParamsBox()
       this.processing = true
       try {
         await Promise.all(this.audioFileList.map(async f => {
-          await removeSilence(f.filePath, f.outputPath, this.volume, this.dur, this.pdur)
-          f.wavesurfer.load(f.outputPath)
-          const dur = await getAudioDuration('file:///' + f.outputPath, true)
-          this.audioFileList = this.audioFileList.map(af => af.containerId === f.containerId? ({ ...af, pDuration: dur }): af)
-          console.log(dur)
+          await removeSilence(f.filePath.replace(/ /g, '\\ '), f.outputPath.replace(/ /g, '\\ '), f.duration, this.volume, this.dur, this.pdur)
+          if (this.processing) {
+            f.wavesurfer.load(f.outputPath)
+            const dur = await getAudioDuration('file:///' + f.outputPath, true)
+            this.audioFileList = this.audioFileList.map(af => af.containerId === f.containerId? ({ ...af, pDuration: dur, done: true }): af)
+            console.log(dur)  
+          }
         }))
       } catch(err) {
-        console.err(err)
+        console.error(err)
       }
       this.processing = false
-      this.processDone = true
+    },
+    cancelProcessing() {
+      killAllProcesses()
+      this.processing = false
+    },
+    isAudioType(s) { 
+      return /\.(mp3|wav|m4a|ogg|flac|aiff|aif|aac|ema)$/i.test(s);
     },
 		async loadFolder() {
-			console.log('!!!')
-      const filePath = await window.electronAPI.openFolder();
-      console.log(filePath)
+      if (this.processing)  return
+      const folderPath = await window.electronAPI.openFolder();
+      const files = fs.readdirSync(folderPath)
+      const newList = []
+      for (let i = 0; i < files.length; i++) {
+        const fileName = files[i]
+        if (this.isAudioType(fileName)) {
+          const filePath = folderPath + '/' + fileName
+          const containerId = 'f' + Date.now() + '_' + i
+          const duration = await getAudioDuration(filePath, true)
+          newList.push({
+            containerId, filePath, fileName, outputPath: this.tempPath + containerId + '_' + fileName, duration
+          })
+        }
+      }
+      this.audioFileList = [...this.audioFileList, ...newList]
+      setTimeout(() => {
+        for (const f of newList) {
+          this.drawBuffer(f.containerId, f.filePath)
+        }
+      }, 100)
 		}
 	}
 })

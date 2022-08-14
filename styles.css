@@ -3,7 +3,7 @@
 /* Add styles here to customize the appearance of your app */
 
 [v-cloak] {
-    display: none;
+    display: none !important;
 }
 
 html {
@@ -12,8 +12,17 @@ html {
     background-color: rgb(245, 245, 245, 20);
 }
 
+body {
+    margin: 0;
+}
+
 #app {
     font-size: 12px;
+    min-height: 500px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
 .menu {
@@ -32,6 +41,8 @@ html {
     color: #555;
     background-color: #eee;
     cursor: pointer;
+    min-width: 70px;
+    text-align: center;
 }
 
 .btn:not(:last-child) {
@@ -162,6 +173,7 @@ html {
 
 .stats_highlight {
     color: rgb(255, 68, 0);
+    padding-right: 5px;
 }
 
 .af_close {
@@ -180,4 +192,27 @@ html {
 
 .af_wave {
     background-color: rgb(245, 245, 245, 20);
+}
+
+.no_audio {
+    min-height: 500px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    color: #555;
+}
+
+#audioFiles {
+    overflow: scroll;
+}
+
+.icon {
+    margin-left: 10px;
+}
+
+.play, .pause {
+    color:rgb(255, 68, 0);
+    font-size: 18px;
+    cursor: pointer;
 }
