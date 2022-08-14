@@ -24,18 +24,6 @@ function runCommand(cmd, args, onData, onInfo, onFinish) {
 }
 
 async function removeSilence(inputPath, outputPath, duration, volume, dur, pdur) {
-  // const command = '-i ' + inputPath + ' -af "silenceremove=start_periods=1:stop_periods=-1:stop_duration=' + (dur/1000) + ':start_threshold=' + volume + 'dB:stop_threshold=' + volume + 'dB:start_silence=' + (pdur/1000) + ':stop_silence=' + (pdur/1000) + '" ' + outputPath
-  // console.log(command)
-  // const args = ['-i', inputPath, '-af', '"silenceremove=stop_periods=-1:stop_duration=' + (dur/1000) + ':stop_threshold=' + volume + 'dB"', outputPath]
-  // await new Promise((r) =>
-  //   runCommand(
-  //     ffmpegPath,
-  //     args,
-  //     (data) => console.log(data),
-  //     (info) => console.log(info),
-  //     () => r()
-  //   )
-  // );
   const args = ['-i', inputPath, '-af', 'silencedetect=n='+volume+'dB:d='+dur/1000, '-f', 'null', '-']
   console.log(args)
   let last_start

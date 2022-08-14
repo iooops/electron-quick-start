@@ -6,7 +6,7 @@
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"> -->
     <link href="./styles.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-    <title>Hello World!</title>
+    <title>一剪没鸡儿</title>
   </head>
   <body>
     <!-- <h1>Hello World!</h1>
@@ -20,7 +20,7 @@
         <div class="btn" :class="{ highlight: processDone }"  @click="saveAs">另存</div>
         <div class="btn" :class="{ highlight: audioFileList.length && !processing }"  @click="clearAll">清空已有</div>
         <div class="stats">
-          <div>总音频数：<span class="stats_highlight">{{audioFileList.length}}</span><span>处理前：<span class="stats_highlight">{{totalDur.toFixed(2)}}s</span></span><span v-if="processDone">处理后：<span class="stats_highlight">{{totalPDur.toFixed(2)}}s</span>相差：<span class="stats_highlight">{{(totalDur - totalPDur).toFixed(2)}}s</span></span></div>
+          <div>总音频数：<span class="stats_highlight">{{audioFileList.length}}</span><span>处理前：<span class="stats_highlight{{totalDur.toFixed(2)}}s</span></span><span v-if="processDone">处理后：<span class="stats_highlight">{{totalPDur.toFixed(2)}}s</span>相差：<span class="stats_highlight">{{(totalDur - totalPDur).toFixed(2)}}s</span></span></div>
         </div>
         <div class="links">
           <div class="link1">画本神器戳我</div>
