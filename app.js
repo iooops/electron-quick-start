@@ -65,8 +65,18 @@ const app = new Vue({
       e.preventDefault();
       e.stopPropagation();
     });
+    document.addEventListener('resize', this.autoRedraw)
   },
 	methods: {
+    autoRedraw() {
+      for (const af of this.audioFileList) {
+        if (af.outputPath) {
+          wavesurfer.load(af.outputPath)
+        } else if (af.path) {
+          wavesurfer.load(af.path)
+        }
+      }
+    },
     handleDurChange(cdur) {
       if (cdur < this.pdur) {
         this.pdur = cdur
