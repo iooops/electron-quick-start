@@ -10,7 +10,7 @@
 
 // const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
 const ffmpegPath = require('ffmpeg-static');
-const spawn = require("child_process").spawn;
+const spawn = require('cross-spawn');
 
 let proc_list = []
 
@@ -49,9 +49,11 @@ async function removeSilence(inputPath, outputPath, duration, volume, dur, pdur)
     )
   );
   console.log(silence_list)
-  const trim_list = []
-  let audio_duration = 0
-  if (silence_list.length) {
+  if (!silence_list.length) {
+    fs.copyFileSync(inputPath, outputPath)
+  } else {
+    const trim_list = []
+    let audio_duration = 0
     if (silence_list[0].start > 0) {
       trim_list.push({ start: 0, end: silence_list[0].start, offset: 0 })
       audio_duration += silence_list[0].start
@@ -66,30 +68,30 @@ async function removeSilence(inputPath, outputPath, duration, volume, dur, pdur)
     } else {
       audio_duration += (duration - trim_list[trim_list.length-1].end)
     }
-  }
-  console.log(trim_list)
-  let trim_script = '"'
-  let i = 0
-  const chunk_list = []
-  for (const t of trim_list) {
-    trim_script += ('[0]atrim='+t.start.toFixed(3)+':'+t.end.toFixed(3)+',adelay='+(t.offset*1000).toFixed(3)+'|'+(t.offset*1000).toFixed(3)+'[t'+i+'];')
-    chunk_list.push('[t'+i+']')
-    i++
-  }
-  chunk_list.push('[1]')
-  trim_script += chunk_list.join('')
-  trim_script += ('amix=inputs='+chunk_list.length+':normalize=0"' )
-  const mix_script = ['-i', inputPath, '-f', 'lavfi', '-t', audio_duration.toFixed(3), '-i', 'anullsrc', '-filter_complex', trim_script, '-map_metadata', '-1', outputPath]
-  console.log(mix_script)
-  await new Promise((r) => 
-    runCommand(
-      ffmpegPath,
-      mix_script,
-      (data) => console.log(data),
-      (info) => console.log(info),
-      () => r()
+    console.log(trim_list)
+    let trim_script = '"'
+    let i = 0
+    const chunk_list = []
+    for (const t of trim_list) {
+      trim_script += ('[0]atrim='+t.start.toFixed(3)+':'+t.end.toFixed(3)+',adelay='+(t.offset*1000).toFixed(3)+'|'+(t.offset*1000).toFixed(3)+'[t'+i+'];')
+      chunk_list.push('[t'+i+']')
+      i++
+    }
+    chunk_list.push('[1]')
+    trim_script += chunk_list.join('')
+    trim_script += ('amix=inputs='+chunk_list.length+':normalize=0"' )
+    const mix_script = ['-i', inputPath, '-f', 'lavfi', '-t', audio_duration.toFixed(3), '-i', 'anullsrc', '-filter_complex', trim_script, '-map_metadata', '-1', outputPath]
+    console.log(mix_script)
+    await new Promise((r) => 
+      runCommand(
+        ffmpegPath,
+        mix_script,
+        (data) => console.log(data),
+        (info) => console.log(info),
+        () => r()
+      )
     )
-  )
+  }
   proc_list.length = 0
   proc_list = []
 }

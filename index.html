@@ -20,11 +20,11 @@
         <div class="btn" :class="{ highlight: processDone }"  @click="saveAs">另存</div>
         <div class="btn" :class="{ highlight: audioFileList.length && !processing }"  @click="clearAll">清空已有</div>
         <div class="stats">
-          <div>总音频数：<span class="stats_highlight">{{audioFileList.length}}</span><span>处理前：<span class="stats_highlight{{totalDur.toFixed(2)}}s</span></span><span v-if="processDone">处理后：<span class="stats_highlight">{{totalPDur.toFixed(2)}}s</span>相差：<span class="stats_highlight">{{(totalDur - totalPDur).toFixed(2)}}s</span></span></div>
+          <div>总音频数：<span class="stats_highlight">{{audioFileList.length}}</span><span>处理前：<span class="stats_highlight">{{totalDur.toFixed(2)}}s</span></span><span v-if="processDone">处理后：<span class="stats_highlight">{{totalPDur.toFixed(2)}}s</span>相差：<span class="stats_highlight">{{(totalDur - totalPDur).toFixed(2)}}s</span></span></div>
         </div>
         <div class="links">
-          <div class="link1">画本神器戳我</div>
-          <div class="link2">对轨神器戳我</div>
+          <div class="link1" @click="openLink('https://www.huabenyaoji.com/')">画本神器戳我</div>
+          <div class="link2" @click="openLink('https://duigui.huabenyaoji.com/')">对轨神器戳我</div>
         </div>
         <div class="btn highlight">
           <div @click="openParamsBox">参数设置</div>
@@ -34,7 +34,7 @@
             </div>
             <div class="box_header">定义静音为</div>
             <div class="box_line">音量低于：<el-input-number v-model="volume" size="small" controls-position="right" :step="0.1" :min="-90" :max="-20"></el-input-number><span class="amount">dB</span></div>
-            <div class="box_line">持续大于：<el-input-number v-model="dur" size="small" controls-position="right" :step="1" :min="500" :max="10000"></el-input-number><span class="amount">ms</span></div>
+            <div class="box_line">持续大于：<el-input-number v-model="dur" size="small" controls-position="right" :step="1" :min="500" :max="10000" @change="handleDurChange"></el-input-number><span class="amount">ms</span></div>
             <div class="box_line">处理后静音最长为：<el-input-number v-model="pdur" size="small" controls-position="right" :step="1" :min="500" :max="dur"></el-input-number><span class="amount">ms</span></div>
             <div class="confirm_btn" @click="confirmParams">确定</div>
           </div>

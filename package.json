@@ -7,7 +7,10 @@
     "start": "electron-forge start",
     "build": "webpack --config webpack.config.js",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "npm_config_arch=x64 && npm_config_platform=darwin && rm -rf node_modules && npm i && electron-forge make",
+    "makewin": "npm_config_arch=x64 && npm_config_platform=win32 && rm -rf node_modules && npm i && electron-packager . --platform=win32 --arch=x64",
+    "pack": "electron-builder --dir",
+    "dist": "npm_config_arch=x64 && npm_config_platform=win32 && rm -rf node_modules && npm i && electron-builder --win --x64"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -28,8 +31,10 @@
     "electron": "^20.0.1"
   },
   "dependencies": {
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.65",
     "electron-squirrel-startup": "^1.0.0",
-    "ffmpeg-static": "^5.0.2"
+    "ffmpeg-static": "^5.0.2",
+    "cross-spawn": "^7.0.3"
   },
   "config": {
     "forge": {
@@ -56,6 +61,12 @@
           "config": {}
         }
       ]
+    }
+  },
+  "build": {
+    "appId": "123",
+    "mac": {
+      "category": "tool"
     }
   }
 }

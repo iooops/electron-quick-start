@@ -1,6 +1,7 @@
 
 // const { createApp } = Vue;
 const fs = require('fs')
+const shell = require('electron').shell
 
 const app = new Vue({
   el: '#app',
@@ -9,10 +10,10 @@ const app = new Vue({
     audioFileList: [],
     processing: false,
     volume: -50,
-    dur: 5000,
+    dur: 2000,
     pdur: 2000,
     old_volume: -50,
-    old_dur: 5000,
+    old_dur: 2000,
     old_pdur: 2000,
     showParamsBox: false,
     showCancelBtn: false
@@ -66,6 +67,14 @@ const app = new Vue({
     });
   },
 	methods: {
+    handleDurChange(cdur) {
+      if (cdur < this.pdur) {
+        this.pdur = cdur
+      }
+    },
+    openLink(link) {
+      shell.openExternal(link)
+    },
     showCancel() {
       this.showCancelBtn = true
     },
