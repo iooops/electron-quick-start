@@ -40,12 +40,12 @@
           </div>
         </div>
         <div class="btn" v-if="processing" @mouseover="showCancel" @mouseleave="hideCancel" @click="cancelProcessing">{{ showCancelBtn? '取消处理': '进度：' + progressHint }}</div>
-        <div class="btn" :class="{ highlight: audioFileList.length && !processDone }" v-else @click="processNow">开始处理</div>
+        <div class="btn" :class="{ highlight: audioFileList.length && !processing }" v-else @click="processNow">开始处理</div>
       </div>
       <div class="no_audio" v-if="!audioFileList.length">
         <div>点击【加载文件夹】或者直接拖拽音频到这里</div>
       </div>
-      <div v-else id="audioFiles" v-loading="processing">
+      <div v-else id="audioFiles" :class="{ processing: processing }" v-loading="processing">
         <div class="af" v-for="f in audioFileList">
           <div class="af_header">
             <div class="af_name">{{f.fileName}}</div>

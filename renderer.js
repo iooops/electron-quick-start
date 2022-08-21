@@ -10,7 +10,7 @@
 
 // const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
 const ffmpegPath = require('ffmpeg-static');
-const spawn = require('cross-spawn');
+const spawn = require("cross-spawn");
 
 let proc_list = []
 
@@ -52,6 +52,8 @@ async function removeSilence(inputPath, outputPath, duration, volume, dur, pdur)
   if (!silence_list.length) {
     fs.copyFileSync(inputPath, outputPath)
   } else {
+    inputPath = inputPath.replace(/ /g, '\\ ')
+    outputPath = outputPath.replace(/ /g, '\\ ')
     const trim_list = []
     let audio_duration = 0
     if (silence_list[0].start > 0) {
@@ -63,6 +65,9 @@ async function removeSilence(inputPath, outputPath, duration, volume, dur, pdur)
       trim_list.push(new_trim)
       audio_duration += (pdur/1000 + new_trim.end - new_trim.start)
     }
+    trim_list.push({
+      start: silence_list[silence_list.length-1].end, end: duration, offset: audio_duration + pdur/1000
+    })
     if (duration - trim_list[trim_list.length-1].end > pdur) {
       audio_duration += pdur
     } else {
@@ -80,7 +85,7 @@ async function removeSilence(inputPath, outputPath, duration, volume, dur, pdur)
     chunk_list.push('[1]')
     trim_script += chunk_list.join('')
     trim_script += ('amix=inputs='+chunk_list.length+':normalize=0"' )
-    const mix_script = ['-i', inputPath, '-f', 'lavfi', '-t', audio_duration.toFixed(3), '-i', 'anullsrc', '-filter_complex', trim_script, '-map_metadata', '-1', outputPath]
+    const mix_script = ['-loglevel', 'error', '-i', inputPath, '-f', 'lavfi', '-t', audio_duration.toFixed(3), '-i', 'anullsrc', '-filter_complex', trim_script, '-map_metadata', '-1', outputPath]
     console.log(mix_script)
     await new Promise((r) => 
       runCommand(
@@ -88,7 +93,10 @@ async function removeSilence(inputPath, outputPath, duration, volume, dur, pdur)
         mix_script,
         (data) => console.log(data),
         (info) => console.log(info),
-        () => r()
+        () => {
+          console.log('!!!done')
+          r()
+        }
       )
     )
   }
@@ -112,14 +120,14 @@ async function getAudioDuration(file, isUrl = false) {
     }
 		const mySound = new Audio(url)
 		let done = false
-		mySound.addEventListener('loadedmetadata', () => {
+		mySound.addEventListener('canplaythrough', () => {
 			URL.revokeObjectURL(url)
 			done = true
 			resolve(mySound.duration)
 		}, false)
 		setTimeout(() => {
 			if (!done)	reject()
-		}, 2000)
+		}, 10000)
 	})
   return dur
 }

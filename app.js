@@ -65,15 +65,16 @@ const app = new Vue({
       e.preventDefault();
       e.stopPropagation();
     });
-    document.addEventListener('resize', this.autoRedraw)
+    window.addEventListener('resize', this.autoRedraw)
   },
 	methods: {
     autoRedraw() {
       for (const af of this.audioFileList) {
-        if (af.outputPath) {
-          wavesurfer.load(af.outputPath)
-        } else if (af.path) {
-          wavesurfer.load(af.path)
+        console.log(af)
+        if (fs.existsSync(af.outputPath)) {
+          af.wavesurfer.load(af.outputPath)
+        } else if (af.filePath) {
+          af.wavesurfer.load(af.filePath)
         }
       }
     },
@@ -161,6 +162,11 @@ const app = new Vue({
     },
     clearAll() {
       if (this.processing || !this.audioFileList.length)  return this.$message.warning('请先加载音频文件')
+      for (const af of this.audioFileList) {
+        if (af.wavesurfer.isPlaying()) {
+          af.wavesurfer.stop()
+        }
+      }
       this.audioFileList = []
       fs.rmdirSync(this.tempPath, { recursive: true })
       this.initTempDir()
@@ -191,7 +197,7 @@ const app = new Vue({
       this.$message.success('操作成功')
     },
     async processNow() {
-      if (this.processing || this.processDone)  return
+      if (this.processing)  return
       if (!this.audioFileList.length) {
         return this.$message.warning('请先加载音频文件后操作')
       }
@@ -199,15 +205,18 @@ const app = new Vue({
       this.processing = true
       try {
         await Promise.all(this.audioFileList.map(async f => {
-          await removeSilence(f.filePath.replace(/ /g, '\\ '), f.outputPath.replace(/ /g, '\\ '), f.duration, this.volume, this.dur, this.pdur)
+          await removeSilence(f.filePath, f.outputPath, f.duration, this.volume, this.dur, this.pdur)
           if (this.processing) {
+            console.log('!!reload waveform')
             f.wavesurfer.load(f.outputPath)
+            console.log('!!get dur')
             const dur = await getAudioDuration('file:///' + f.outputPath, true)
             this.audioFileList = this.audioFileList.map(af => af.containerId === f.containerId? ({ ...af, pDuration: dur, done: true }): af)
             console.log(dur)  
           }
         }))
       } catch(err) {
+        this.$message.error('报错了！')
         console.error(err)
       }
       this.processing = false

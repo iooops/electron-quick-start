@@ -189,7 +189,6 @@ body {
     color: rgb(255, 68, 0);
 }
 
-
 .af_wave {
     background-color: rgb(245, 245, 245, 20);
 }
@@ -203,7 +202,7 @@ body {
     color: #555;
 }
 
-#audioFiles {
+#audioFiles:not(.processing) {
     overflow: scroll;
 }
 
