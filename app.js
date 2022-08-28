@@ -203,6 +203,7 @@ const app = new Vue({
       }
       if (this.showParamsBox) this.hideParamsBox()
       this.processing = true
+      this.audioFileList = this.audioFileList.map(af => ({ ...af, done: false }))
       try {
         await Promise.all(this.audioFileList.map(async f => {
           await removeSilence(f.filePath, f.outputPath, f.duration, this.volume, this.dur, this.pdur)

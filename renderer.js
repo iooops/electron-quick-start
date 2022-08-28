@@ -24,7 +24,7 @@ function runCommand(cmd, args, onData, onInfo, onFinish) {
 }
 
 async function removeSilence(inputPath, outputPath, duration, volume, dur, pdur) {
-  const args = ['-i', inputPath, '-af', 'silencedetect=n='+volume+'dB:d='+dur/1000, '-f', 'null', '-']
+  const args = ['-i', inputPath.replace(/ /g, '\\ '), '-af', 'silencedetect=n='+volume+'dB:d='+dur/1000, '-f', 'null', '-']
   console.log(args)
   let last_start
   const silence_list = []
@@ -85,7 +85,7 @@ async function removeSilence(inputPath, outputPath, duration, volume, dur, pdur)
     chunk_list.push('[1]')
     trim_script += chunk_list.join('')
     trim_script += ('amix=inputs='+chunk_list.length+':normalize=0"' )
-    const mix_script = ['-loglevel', 'error', '-i', inputPath, '-f', 'lavfi', '-t', audio_duration.toFixed(3), '-i', 'anullsrc', '-filter_complex', trim_script, '-map_metadata', '-1', outputPath]
+    const mix_script = ['-y', '-loglevel', 'error', '-i', inputPath, '-f', 'lavfi', '-t', audio_duration.toFixed(3), '-i', 'anullsrc', '-filter_complex', trim_script, '-map_metadata', '-1', outputPath]
     console.log(mix_script)
     await new Promise((r) => 
       runCommand(
@@ -127,7 +127,7 @@ async function getAudioDuration(file, isUrl = false) {
 		}, false)
 		setTimeout(() => {
 			if (!done)	reject()
-		}, 10000)
+		}, 20000)
 	})
   return dur
 }
